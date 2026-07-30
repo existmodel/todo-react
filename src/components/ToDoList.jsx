@@ -1,7 +1,7 @@
 import ToDoItem from "./ToDoItem";
 
 const ToDoList = (props) => {
-  const { tasks = [], onDeleteTaskButtonClick, toogleTaskComplete } = props;
+  const { tasks = [], onDeleteTaskButtonClick, onTaskCompleteChange } = props;
   const hasTasks = true;
 
   if (!hasTasks) {
@@ -26,7 +26,7 @@ const ToDoList = (props) => {
           className="todo__item"
           key={task.id}
           onDeleteTaskButtonClick={onDeleteTaskButtonClick}
-          onTaskCompleteChange={toogleTaskComplete}
+          onTaskCompleteChange={onTaskCompleteChange}
           {...task}
         />
       ))}
