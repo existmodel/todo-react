@@ -1,5 +1,5 @@
 const ToDoInfo = (props) => {
-  const { total, done } = props;
+  const { total, done, onDeleteAllButtonClick } = props;
   const hasTasks = total > 0;
   return (
     <div className="todo__info">
@@ -13,7 +13,11 @@ const ToDoInfo = (props) => {
       Поскольку левая часть истинна, оператор && возвращает то, что находится справа — 
       то есть вашу JSX-разметку с кнопкой <button>...</button>.*/}
       {hasTasks && (
-        <button className="todo__delete-all-button" type="button">
+        <button
+          className="todo__delete-all-button"
+          type="button"
+          onClick={onDeleteAllButtonClick}
+        >
           Delete all
         </button>
       )}

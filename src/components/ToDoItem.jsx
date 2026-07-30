@@ -1,5 +1,12 @@
 const ToDoItem = (props) => {
-  const { className = "", id, title, isDone } = props;
+  const {
+    className = "",
+    id,
+    title,
+    isDone,
+    onDeleteTaskButtonClick,
+    onTaskCompleteChange,
+  } = props;
   return (
     <li className={`todo-item ${className}`}>
       <input
@@ -7,15 +14,21 @@ const ToDoItem = (props) => {
         id={id}
         type="checkbox"
         checked={isDone}
-        readOnly
+        onChange={({ target }) => {
+          onTaskCompleteChange(id, target.checked); //деструктурируем target сразу из event который получаем из события change
+        }}
       />
       <label className="todo-item__label" htmlFor={id}>
         {title}
       </label>
+
       <button
         className="todo-item__delete-button"
         aria-label="Delete"
         title="Delete"
+        onClick={() => {
+          onDeleteTaskButtonClick(id);
+        }} //нужно вызвать функцию передав ей id
       >
         <svg
           width="20"

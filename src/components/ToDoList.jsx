@@ -1,7 +1,7 @@
 import ToDoItem from "./ToDoItem";
 
 const ToDoList = (props) => {
-  const { tasks = [] } = props;
+  const { tasks = [], onDeleteTaskButtonClick, toogleTaskComplete } = props;
   const hasTasks = true;
 
   if (!hasTasks) {
@@ -22,7 +22,13 @@ const ToDoList = (props) => {
 
       {/*На выходе из map будет массив React-элементов (виртуальных узлов), созданных на основе вашего списка данных tasks*/}
       {tasks.map((task) => (
-        <ToDoItem className="todo__item" key={task.id} {...task} />
+        <ToDoItem
+          className="todo__item"
+          key={task.id}
+          onDeleteTaskButtonClick={onDeleteTaskButtonClick}
+          onTaskCompleteChange={toogleTaskComplete}
+          {...task}
+        />
       ))}
     </ul>
   );

@@ -8,13 +8,34 @@ const ToDo = () => {
     { id: "task-1", title: "Купить молоко", isDone: false },
     { id: "task-2", title: "Купить хлеб", isDone: true },
   ];
+
+  const deleteAllTasks = () => {
+    console.log("delete");
+  };
+
+  const deleteTask = (taskId) => {
+    console.log(`deleteTask c id ${taskId}`);
+  };
+
+  const toogleTaskComplete = (taskId, isDone) => {
+    console.log(`Task${taskId} ${isDone ? "done" : "not done"}`);
+  };
+
+  const filterTasks = (query) => {
+    console.log(`Поиск ${query}`);
+  };
+
+  const addTask = () => {
+    console.log("Add Task");
+  };
+
   return (
     <div className="todo">
       {/*выводим компонент*/}
 
       <h1 className="todo__title">To Do List</h1>
-      <AddTaskForm />
-      <SearchTaskForm />
+      <AddTaskForm addTask={addTask} />
+      <SearchTaskForm onSearchInput={filterTasks} />
 
       {/*tasks.filter(...) — метод массивов .filter() создает новый массив, в который попадут только те задачи, которые пройдут проверку 
       (вернут true внутри функции).
@@ -28,8 +49,13 @@ const ToDo = () => {
       <ToDoInfo
         total={tasks.length}
         done={tasks.filter(({ isDone }) => isDone).length} //фильтрует задачи на выполненность если isDone true то попадает в массив и длина массива и есть число
+        onDeleteAllButtonClick={deleteAllTasks}
       />
-      <ToDoList tasks={tasks} />
+      <ToDoList
+        tasks={tasks}
+        onDeleteTaskButtonClick={deleteTask}
+        onTaskCompleteChange={toogleTaskComplete}
+      />
     </div>
   );
 };
