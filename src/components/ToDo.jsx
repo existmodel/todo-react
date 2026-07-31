@@ -1,23 +1,25 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AddTaskForm from "./AddTaskForm";
 import SearchTaskForm from "./SearchTaskForm";
 import ToDoInfo from "./ToDoInfo";
 import ToDoList from "./ToDoList";
 
 const ToDo = () => {
-  //   const tasks = [
-  //     { id: "task-1", title: "Купить молоко", isDone: false },
-  //     { id: "task-2", title: "Купить хлеб", isDone: true },
-  //   ];
+  const [tasks, setTasks] = useState(() => {
+    const savedTasks = localStorage.getItem("tasks");
 
-  //   const [value, setValue] = useState(initialValue);
+    if (savedTasks) {
+      return JSON.parse(savedTasks);
+    }
 
-  const [tasks, setTasks] = useState([
-    { id: "task-1", title: "Купить молоко", isDone: false },
-    { id: "task-2", title: "Купить хлеб", isDone: true },
-  ]);
+    return [
+      { id: "task-1", title: "Купить молоко", isDone: false },
+      { id: "task-2", title: "Купить хлеб", isDone: true },
+    ];
+  });
 
   const [newTaskTitle, setNewTaskTitle] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const deleteAllTasks = () => {
     const isConfirmed = confirm("Are you sure?");
@@ -43,10 +45,6 @@ const ToDo = () => {
     );
   };
 
-  const filterTasks = (query) => {
-    console.log(`Поиск ${query}`);
-  };
-
   const addTask = () => {
     if (newTaskTitle.trim().length > 0) {
       //Функция проверяет, что текст не пустой, создает объект новой задачи newTask и добавляет его в список всех задач
@@ -57,21 +55,35 @@ const ToDo = () => {
       };
       setTasks([...tasks, newTask]);
       setNewTaskTitle(""); //"" чтобы очистить поле ввода (инпут)
+      setSearchQuery(""); //сброс поиска
     }
   };
 
+  useEffect(() => {
+    localStorage.setItem("tasks", JSON.stringify(tasks)); //делаем каждый раз когда список задач меняется и при первом рендере
+  }, [tasks]); //следим за изменениями в tasks
+
+  const clearSearchQuery = searchQuery.trim().toLowerCase();
+  //ФИЛЬТРАЦИЯ ЗАДАЧ ПО ВВОДУ ИЗ ПОИСКА
+  const filteredTasks =
+    clearSearchQuery.length > 0
+      ? tasks.filter(({ title }) =>
+          title.toLowerCase().includes(clearSearchQuery),
+        )
+      : null; //если поиск не активен или там пробелы то будет null
   return (
     <div className="todo">
       {/*выводим компонент*/}
-
       <h1 className="todo__title">To Do List</h1>
       <AddTaskForm
         addTask={addTask}
         newTaskTitle={newTaskTitle}
         setNewTaskTitle={setNewTaskTitle}
       />
-      <SearchTaskForm onSearchInput={filterTasks} />
-
+      <SearchTaskForm
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+      />
       {/*tasks.filter(...) — метод массивов .filter() создает новый массив, в который попадут только те задачи, которые пройдут проверку 
       (вернут true внутри функции).
 ({isDone}) => ... — это стрелочная функция, которая принимает каждый элемент массива (task). 
@@ -88,6 +100,7 @@ const ToDo = () => {
       />
       <ToDoList
         tasks={tasks}
+        filteredTasks={filteredTasks}
         onDeleteTaskButtonClick={deleteTask}
         onTaskCompleteChange={toggleTaskComplete}
       />
