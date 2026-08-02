@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import AddTaskForm from "./AddTaskForm";
 import SearchTaskForm from "./SearchTaskForm";
 import ToDoInfo from "./ToDoInfo";
@@ -26,45 +26,51 @@ const ToDo = () => {
   const firstIncompleteTaskRef = useRef(null);
   const firstIncompleteTaskId = tasks.find(({ isDone }) => !isDone)?.id; //находим 1 невыполненную задачу(во время рендера только один эдемент получит ref и реакт присвоит ссылку)
 
-  const deleteAllTasks = () => {
+  const deleteAllTasks = useCallback(() => {
     const isConfirmed = confirm("Are you sure?");
     if (isConfirmed) {
       setTasks([]); //если да то пустой массив очищаем список задач/обнуляем текущий STATE
     }
-  };
+  }, []);
 
-  const deleteTask = (taskId) => {
-    setTasks(tasks.filter((task) => task.id !== taskId)); //создаем новый массив без элемента с пришедшим id
-  };
+  const deleteTask = useCallback(() => {
+    (taskId) => {
+      setTasks(tasks.filter((task) => task.id !== taskId)); //создаем новый массив без элемента с пришедшим id
+    };
+  }, [tasks]);
 
-  const toggleTaskComplete = (taskId, isDone) => {
-    setTasks(
-      tasks.map((task) => {
-        //перебираем массив задач если id совпадает то возвращаем новый обьект задач в котором изменяем только поле isDone
-        if (task.id === taskId) {
-          return { ...task, isDone };
-        }
+  const toggleTaskComplete = useCallback(() => {
+    (taskId, isDone) => {
+      setTasks(
+        tasks.map((task) => {
+          //перебираем массив задач если id совпадает то возвращаем новый обьект задач в котором изменяем только поле isDone
+          if (task.id === taskId) {
+            return { ...task, isDone };
+          }
 
-        return task; //для всех остальных задач возвращаем их без изменений
-      }),
-    );
-  };
+          return task; //для всех остальных задач возвращаем их без изменений
+        }),
+      );
+    };
+  }, [tasks]);
 
-  const addTask = () => {
-    if (newTaskTitle.trim().length > 0) {
-      //Функция проверяет, что текст не пустой, создает объект новой задачи newTask и добавляет его в список всех задач
-      const newTask = {
-        id: crypto?.randomUUID() ?? Date.now().toString(),
-        title: newTaskTitle,
-        isDone: false,
-      };
-      setTasks([...tasks, newTask]);
-      setNewTaskTitle(""); //"" чтобы очистить поле ввода (инпут)
+  const addTask = useCallback(() => {
+    () => {
+      if (newTaskTitle.trim().length > 0) {
+        //Функция проверяет, что текст не пустой, создает объект новой задачи newTask и добавляет его в список всех задач
+        const newTask = {
+          id: crypto?.randomUUID() ?? Date.now().toString(),
+          title: newTaskTitle,
+          isDone: false,
+        };
+        setTasks((prevState) => [...prevState, newTask]);
+        setNewTaskTitle(""); //"" чтобы очистить поле ввода (инпут)
 
-      setSearchQuery(""); //сброс поиска
-      newTaskInputRef.current.focus();
-    }
-  };
+        setSearchQuery(""); //сброс поиска
+        newTaskInputRef.current.focus();
+      }
+    };
+  }, [newTaskTitle]);
 
   useEffect(() => {
     localStorage.setItem("tasks", JSON.stringify(tasks)); //делаем каждый раз когда список задач меняется и при первом рендере
@@ -82,14 +88,20 @@ const ToDo = () => {
   //     console.log(`Component TODO  rendered ${renderCount.current} counts`); //чтобы реагировать на каждый рендер не ставим второй аргумент (массив)
   //   });
 
-  const clearSearchQuery = searchQuery.trim().toLowerCase();
   //ФИЛЬТРАЦИЯ ЗАДАЧ ПО ВВОДУ ИЗ ПОИСКА
-  const filteredTasks =
-    clearSearchQuery.length > 0
+  const filteredTasks = useMemo(() => {
+    const clearSearchQuery = searchQuery.trim().toLowerCase();
+    return clearSearchQuery.length > 0
       ? tasks.filter(({ title }) =>
           title.toLowerCase().includes(clearSearchQuery),
         )
       : null; //если поиск не активен или там пробелы то будет null
+  }, [tasks, searchQuery]);
+
+  const doneTasks = useMemo(() => {
+    return tasks.filter(({ isDone }) => isDone).length;
+  }, [tasks]);
+
   return (
     <div className="todo">
       {/*выводим компонент*/}
@@ -115,7 +127,8 @@ const ToDo = () => {
 .length — в самом конце мы берем длину этого нового, отфильтрованного массива (где остались только выполненные задачи).*/}
       <ToDoInfo
         total={tasks.length}
-        done={tasks.filter(({ isDone }) => isDone).length} //фильтрует задачи на выполненность если isDone true то попадает в массив и длина массива и есть число
+        // done={tasks.filter(({ isDone }) => isDone).length} //фильтрует задачи на выполненность если isDone true то попадает в массив и длина массива и есть число
+        done={doneTasks} //оптимизируем
         onDeleteAllButtonClick={deleteAllTasks}
       />
 
