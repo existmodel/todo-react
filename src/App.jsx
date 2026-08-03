@@ -5,7 +5,7 @@ const App = () => {
   console.log("App");
   return (
     <TasksProvider>
-      <ToDo />;
+      <ToDo />
     </TasksProvider>
   );
 };

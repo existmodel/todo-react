@@ -1,108 +1,29 @@
-import {
-  createContext,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { createContext } from "react";
+import useTasks from "../hooks/useTasks";
+import useIncompleteTaskScroll from "../hooks/useIncompleteTaskScroll";
 
 export const TasksContext = createContext({});
 
 export const TasksProvider = (props) => {
   const { children } = props;
+  const {
+    tasks,
+    filteredTasks,
 
-  const [tasks, setTasks] = useState(() => {
-    const savedTasks = localStorage.getItem("tasks");
+    deleteTask,
+    deleteAllTasks,
+    toggleTaskComplete,
+    newTaskTitle,
+    setNewTaskTitle,
+    searchQuery,
+    setSearchQuery,
+    newTaskInputRef,
+    addTask,
+  } = useTasks();
 
-    if (savedTasks) {
-      return JSON.parse(savedTasks);
-    }
+  const { firstIncompleteTaskRef, firstIncompleteTaskId } =
+    useIncompleteTaskScroll(tasks);
 
-    return [
-      { id: "task-1", title: "Купить молоко", isDone: false },
-      { id: "task-2", title: "Купить хлеб", isDone: true },
-    ];
-  });
-
-  const [newTaskTitle, setNewTaskTitle] = useState("");
-  const [searchQuery, setSearchQuery] = useState("");
-
-  const newTaskInputRef = useRef(null);
-  const firstIncompleteTaskRef = useRef(null);
-  const firstIncompleteTaskId = tasks.find(({ isDone }) => !isDone)?.id; //находим 1 невыполненную задачу(во время рендера только один эдемент получит ref и реакт присвоит ссылку)
-
-  const deleteAllTasks = useCallback(() => {
-    const isConfirmed = confirm("Are you sure?");
-    if (isConfirmed) {
-      setTasks([]); //если да то пустой массив очищаем список задач/обнуляем текущий STATE
-    }
-  }, []);
-
-  const deleteTask = useCallback(
-    (taskId) => {
-      setTasks(tasks.filter((task) => task.id !== taskId)); //создаем новый массив без элемента с пришедшим id
-    },
-    [tasks],
-  );
-
-  const toggleTaskComplete = useCallback(
-    (taskId, isDone) => {
-      setTasks(
-        tasks.map((task) => {
-          //перебираем массив задач если id совпадает то возвращаем новый обьект задач в котором изменяем только поле isDone
-          if (task.id === taskId) {
-            return { ...task, isDone };
-          }
-
-          return task; //для всех остальных задач возвращаем их без изменений
-        }),
-      );
-    },
-    [tasks],
-  );
-
-  const addTask = useCallback(() => {
-    if (newTaskTitle.trim().length > 0) {
-      //Функция проверяет, что текст не пустой, создает объект новой задачи newTask и добавляет его в список всех задач
-      const newTask = {
-        id: crypto?.randomUUID() ?? Date.now().toString(),
-        title: newTaskTitle,
-        isDone: false,
-      };
-      setTasks((prevState) => [...prevState, newTask]);
-      setNewTaskTitle(""); //"" чтобы очистить поле ввода (инпут)
-
-      setSearchQuery(""); //сброс поиска
-      newTaskInputRef.current.focus();
-    }
-  }, [newTaskTitle]);
-
-  useEffect(() => {
-    localStorage.setItem("tasks", JSON.stringify(tasks)); //делаем каждый раз когда список задач меняется и при первом рендере
-  }, [tasks]); //следим за изменениями в tasks
-
-  useEffect(() => {
-    newTaskInputRef.current.focus();
-  }, []);
-
-  //   СЧЕТЧИК
-  //   const renderCount = useRef(0);
-
-  //   useEffect(() => {
-  //     renderCount.current++;
-  //     console.log(`Component TODO  rendered ${renderCount.current} counts`); //чтобы реагировать на каждый рендер не ставим второй аргумент (массив)
-  //   });
-
-  //ФИЛЬТРАЦИЯ ЗАДАЧ ПО ВВОДУ ИЗ ПОИСКА
-  const filteredTasks = useMemo(() => {
-    const clearSearchQuery = searchQuery.trim().toLowerCase();
-    return clearSearchQuery.length > 0
-      ? tasks.filter(({ title }) =>
-          title.toLowerCase().includes(clearSearchQuery),
-        )
-      : null; //если поиск не активен или там пробелы то будет null
-  }, [tasks, searchQuery]);
   return (
     <TasksContext.Provider
       value={{
