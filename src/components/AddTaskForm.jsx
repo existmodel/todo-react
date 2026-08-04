@@ -1,15 +1,31 @@
 import Field from "./Field";
 import Button from "./Button";
-import { useContext } from "react";
+import { useState, useContext } from "react";
 import { TasksProvider, TasksContext } from "../context/TasksContext";
 
 const AddTaskForm = () => {
   const { addTask, newTaskTitle, setNewTaskTitle, newTaskInputRef } =
     useContext(TasksContext);
 
+  const [error, setError] = useState("");
+
+  const clearNewTaskTitle = newTaskTitle.trim();
+  const isNewTaskTitleEmpty = clearNewTaskTitle.length === 0;
+
   const onSubmit = (event) => {
     event.preventDefault();
-    addTask();
+
+    if (!isNewTaskTitleEmpty) {
+      addTask(clearNewTaskTitle);
+    }
+  };
+
+  const onInput = (event) => {
+    const { value } = event.target;
+    const clearValue = value.trim();
+    const hasOnlySpaced = value.length > 0 && clearValue.length === 0; //проверка на как минимум 1 символ
+    setNewTaskTitle(value);
+    setError(hasOnlySpaced ? "The task cannot be empty" : "");
   };
   return (
     <form className="todo__form" onSubmit={onSubmit}>
@@ -17,12 +33,15 @@ const AddTaskForm = () => {
         className="todo__field"
         label="New Task Title"
         id="new-task"
+        error={error}
         value={newTaskTitle}
-        onInput={(event) => setNewTaskTitle(event.target.value)}
+        onInput={onInput}
         ref={newTaskInputRef}
       />
       {/*Add попадает в children*/}
-      <Button type="submit">Add</Button>
+      <Button type="submit" isDisabled={isNewTaskTitleEmpty}>
+        Add
+      </Button>
     </form>
   );
 };

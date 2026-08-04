@@ -45,21 +45,19 @@ const useTasks = () => {
     [tasks],
   );
 
-  const addTask = useCallback(() => {
-    if (newTaskTitle.trim().length > 0) {
-      //Функция проверяет, что текст не пустой, создает объект новой задачи newTask и добавляет его в список всех задач
-      const newTask = {
-        id: crypto?.randomUUID() ?? Date.now().toString(),
-        title: newTaskTitle,
-        isDone: false,
-      };
-      setTasks((prevState) => [...prevState, newTask]);
-      setNewTaskTitle(""); //"" чтобы очистить поле ввода (инпут)
+  const addTask = useCallback((title) => {
+    //Функция проверяет, что текст не пустой, создает объект новой задачи newTask и добавляет его в список всех задач
+    const newTask = {
+      id: crypto?.randomUUID() ?? Date.now().toString(),
+      title: title,
+      isDone: false,
+    };
+    setTasks((prevState) => [...prevState, newTask]);
+    setNewTaskTitle(""); //"" чтобы очистить поле ввода (инпут)
 
-      setSearchQuery(""); //сброс поиска
-      newTaskInputRef.current.focus();
-    }
-  }, [newTaskTitle]);
+    setSearchQuery(""); //сброс поиска
+    newTaskInputRef.current.focus();
+  }, []);
 
   useEffect(() => {
     // localStorage.setItem("tasks", JSON.stringify(tasks)); //делаем каждый раз когда список задач меняется и при первом рендере
