@@ -3,6 +3,7 @@ import { TasksContext } from "../../context/TasksContext";
 import { useContext } from "react";
 import RouterLink from "../RouterLink/RouterLink";
 import styles from "./ToDoItem.module.scss";
+// import { useRef } from "react";
 
 const ToDoItem = (props) => {
   const { className = "", id, title, isDone } = props;
@@ -11,11 +12,21 @@ const ToDoItem = (props) => {
     firstIncompleteTaskId,
     deleteTask,
     toggleTaskComplete,
+    disappearingTaskId,
+    appearingTaskId,
   } = useContext(TasksContext);
+
+  //Этот код создаёт объединение двух React-рефов (firstIncompleteTaskRef и animationRef) в один combinedRef,
+  // который можно передать в JSX-элемент через проп ref.
+  //В контексте React ref (ссылка) — это специальный объект, который хранит прямую ссылку на DOM-элемент или любое другое значение, сохраняющееся между рендерами.
 
   return (
     <li
-      className={`${styles.todoItem} ${className}`}
+      className={`
+        ${styles.todoItem} 
+        ${className} 
+        ${disappearingTaskId === id ? styles.isDisappearing : ""}
+        ${appearingTaskId === id ? styles.isAppearing : ""}`}
       ref={id === firstIncompleteTaskId ? firstIncompleteTaskRef : null}
     >
       <input
@@ -34,13 +45,12 @@ const ToDoItem = (props) => {
         {" "}
         {title}
       </RouterLink>
+
       <button
         className={styles.deleteButton}
         aria-label="Delete"
         title="Delete"
-        onClick={() => {
-          deleteTask(id);
-        }} //нужно вызвать функцию передав ей id
+        onClick={() => deleteTask(id)} //нужно вызвать функцию передав ей id
       >
         <svg
           width="20"

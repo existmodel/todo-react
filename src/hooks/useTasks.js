@@ -6,6 +6,8 @@ const useTasks = () => {
 
   const [newTaskTitle, setNewTaskTitle] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [disappearingTaskId, setDisappearingTaskId] = useState(null);
+  const [appearingTaskId, setAppearingTaskId] = useState(null);
 
   const newTaskInputRef = useRef(null);
 
@@ -19,7 +21,14 @@ const useTasks = () => {
   const deleteTask = useCallback(
     (taskId) => {
       tasksAPI.delete(taskId).then(() => {
-        setTasks(tasks.filter((task) => task.id !== taskId)); //создаем новый массив без элемента с пришедшим id
+        setDisappearingTaskId(taskId);
+        setTimeout(
+          () => {
+            setTasks(tasks.filter((task) => task.id !== taskId));
+            setDisappearingTaskId(null); //сброс id удаляемой задачи
+          },
+          400, //создаем новый массив без элемента с пришедшим id)
+        );
       });
     },
     [tasks],
@@ -56,6 +65,10 @@ const useTasks = () => {
 
       setSearchQuery(""); //сброс поиска
       newTaskInputRef.current.focus();
+      setAppearingTaskId(addedTask.id);
+      setTimeout(() => {
+        setAppearingTaskId(null);
+      }, 400);
     });
   }, []);
 
@@ -96,6 +109,8 @@ const useTasks = () => {
     setSearchQuery,
     newTaskInputRef,
     addTask,
+    disappearingTaskId,
+    appearingTaskId,
   };
 };
 
