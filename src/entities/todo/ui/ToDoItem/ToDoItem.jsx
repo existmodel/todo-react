@@ -2,6 +2,7 @@ import { memo, useContext } from "react";
 import { TasksContext } from "@/entities/todo";
 import RouterLink from "@/shared/ui/RouterLink";
 import styles from "./ToDoItem.module.scss";
+import { highlightCaseInsensitive } from "../../../../shared/utils/highlight";
 // import { useRef } from "react";
 
 const ToDoItem = (props) => {
@@ -13,7 +14,12 @@ const ToDoItem = (props) => {
     toggleTaskComplete,
     disappearingTaskId,
     appearingTaskId,
+    searchQuery,
   } = useContext(TasksContext);
+
+  //для регистра при поиске тасков
+
+  const highlightedTitle = highlightCaseInsensitive(title, searchQuery);
 
   //Этот код создаёт объединение двух React-рефов (firstIncompleteTaskRef и animationRef) в один combinedRef,
   // который можно передать в JSX-элемент через проп ref.
@@ -41,8 +47,7 @@ const ToDoItem = (props) => {
         {title}
       </label>
       <RouterLink to={`/tasks/${id}`} aria-label="Task detail page">
-        {" "}
-        {title}
+        <span dangerouslySetInnerHTML={{ __html: highlightedTitle }} />
       </RouterLink>
 
       <button
